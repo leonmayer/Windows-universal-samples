@@ -10,10 +10,11 @@
 //*********************************************************
 
 using System;
+using System.IO;
+using System.Text;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
@@ -567,6 +568,11 @@ namespace SDKTemplate
             byte flags = data[0];
             bool isHeartRateValueSizeLong = ((flags & heartRateValueFormat) != 0);
 
+            Test1 test69 = new Test1();
+            test69.Csvtest();
+
+
+
             if (isHeartRateValueSizeLong)
             {
                 return BitConverter.ToUInt16(data, 1);
@@ -577,4 +583,53 @@ namespace SDKTemplate
             }
         }
     }
+
+    public class Test1
+    {
+        public void Csvtest()
+        {
+            string strFilePath = @"C:\Users\Leon\Desktop\testtest.csv"; ;
+            string strSeperator = ",";
+            StringBuilder sbOutput = new StringBuilder();
+
+            int[][] inaOutput = new int[][]{
+        new int[]{1000, 2000, 3000, 4000, 5000},
+        new int[]{6000, 7000, 8000, 9000, 10000},
+        new int[]{11000, 12000, 13000, 14000, 15000}
+                };
+            int ilength = inaOutput.GetLength(0);
+            for (int i = 0; i < ilength; i++)
+                sbOutput.AppendLine(string.Join(strSeperator, inaOutput[i]));
+
+            //File.SetAttributes(strFilePath, FileAttributes.Normal);
+            // Create and write the csv file
+            bool adf = File.Exists(strFilePath);
+
+            if (!File.Exists(strFilePath))
+            {
+                File.WriteAllText(strFilePath, sbOutput.ToString());
+            }
+
+            // To append more lines to the csv file
+            File.AppendAllText(strFilePath, sbOutput.ToString());
+        }
+    }
 }
+
+//string strFilePath = @"C:\Users\Leon\Desktop\testtest.csv"; ;
+//string strSeperator = ",";
+//StringBuilder sbOutput = new StringBuilder();
+
+//if (3 < data.GetLength(0))
+//{
+//double abcd = BitConverter.ToDouble(data, 2);
+//string vOut = BitConverter.ToString(data, 2, 1);
+//string vOut = Convert.ToString(BitConverter.ToDouble(data, 2 /* Which byte position to convert */));
+//sbOutput.AppendLine(string.Join(strSeperator, vOut));
+
+// Create and write the csv file
+//File.WriteAllText(strFilePath, sbOutput.ToString());
+
+// To append more lines to the csv file
+//File.AppendAllText(strFilePath, sbOutput.ToString());
+//}
