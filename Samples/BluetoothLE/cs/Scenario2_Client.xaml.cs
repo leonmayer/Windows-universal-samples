@@ -328,6 +328,25 @@ namespace SDKTemplate
             }
         }
 
+        private async void CharacteristicSaveButton_Click()
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            picker.FileTypeFilter.Add(".csv");
+
+            Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                // Application now has read/write access to the picked file
+               // this.textBlock.Text = "Picked photo: " + file.Name;
+            }
+            else
+            {
+                //this.textBlock.Text = "Operation cancelled.";
+            }
+        }
+
         private async void CharacteristicWriteButtonInt_Click()
         {
             if (!String.IsNullOrEmpty(CharacteristicWriteValue.Text))
@@ -578,3 +597,20 @@ namespace SDKTemplate
         }
     }
 }
+//string strFilePath = @"C:\Users\Leon\Desktop\testtest.csv"; ;
+//string strSeperator = ",";
+//StringBuilder sbOutput = new StringBuilder();
+
+//if (3 < data.GetLength(0))
+//{
+//double abcd = BitConverter.ToDouble(data, 2);
+//string vOut = BitConverter.ToString(data, 2, 1);
+//string vOut = Convert.ToString(BitConverter.ToDouble(data, 2 /* Which byte position to convert */));
+//sbOutput.AppendLine(string.Join(strSeperator, vOut));
+
+// Create and write the csv file
+//File.WriteAllText(strFilePath, sbOutput.ToString());
+
+// To append more lines to the csv file
+//File.AppendAllText(strFilePath, sbOutput.ToString());
+//}
