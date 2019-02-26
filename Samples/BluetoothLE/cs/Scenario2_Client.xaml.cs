@@ -328,6 +328,7 @@ namespace SDKTemplate
             }
         }
 
+        private bool subscribedforcsvnotifications = false;
         private async void CharacteristicSaveButton_Click()
         {
             var picker = new Windows.Storage.Pickers.FileOpenPicker();
@@ -339,12 +340,105 @@ namespace SDKTemplate
             if (file != null)
             {
                 // Application now has read/write access to the picked file
-               // this.textBlock.Text = "Picked photo: " + file.Name;
+                // this.textBlock.Text = "Picked photo: " + file.Name;
             }
             else
             {
                 //this.textBlock.Text = "Operation cancelled.";
             }
+
+
+
+            string strFilePath = file.Path; ;
+            string strSeperator = ",";
+            StringBuilder sbOutput = new StringBuilder();
+
+            if (3 < data.GetLength(0))
+            {
+            double abcd = BitConverter.ToDouble(data, 2);
+            string vOut = BitConverter.ToString(data, 2, 1);
+            string vOut = Convert.ToString(BitConverter.ToDouble(data, 2 /* Which byte position to convert */));
+            sbOutput.AppendLine(string.Join(strSeperator, vOut));
+
+            //Create and write the csv file
+            File.WriteAllText(strFilePath, sbOutput.ToString());
+
+            // To append more lines to the csv file
+            File.AppendAllText(strFilePath, sbOutput.ToString());
+            }
+
+
+
+
+            if (!subscribedforcsvnotifications)
+            {
+                // initialize status
+                GattCommunicationStatus status = GattCommunicationStatus.Unreachable;
+                var cccdValue = GattClientCharacteristicConfigurationDescriptorValue.None;
+                if (selectedCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Indicate))
+                {
+                    cccdValue = GattClientCharacteristicConfigurationDescriptorValue.Indicate;
+                }
+
+                else if (selectedCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
+                {
+                    cccdValue = GattClientCharacteristicConfigurationDescriptorValue.Notify;
+                }
+
+                try
+                {
+                    // BT_Code: Must write the CCCD in order for server to send indications.
+                    // We receive them in the ValueChanged event handler.
+                    status = await selectedCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(cccdValue);
+
+                    if (status == GattCommunicationStatus.Success)
+                    {
+                        AddValueChangedHandler();
+                        rootPage.NotifyUser("Successfully subscribed for value changes", NotifyType.StatusMessage);
+                    }
+                    else
+                    {
+                        rootPage.NotifyUser($"Error registering for value changes: {status}", NotifyType.ErrorMessage);
+                    }
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    // This usually happens when a device reports that it support indicate, but it actually doesn't.
+                    rootPage.NotifyUser(ex.Message, NotifyType.ErrorMessage);
+                }
+            }
+            else
+            {
+                try
+                {
+                    // BT_Code: Must write the CCCD in order for server to send notifications.
+                    // We receive them in the ValueChanged event handler.
+                    // Note that this sample configures either Indicate or Notify, but not both.
+                    var result = await
+                            selectedCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
+                                GattClientCharacteristicConfigurationDescriptorValue.None);
+                    if (result == GattCommunicationStatus.Success)
+                    {
+                        subscribedForNotifications = false;
+                        RemoveValueChangedHandler();
+                        rootPage.NotifyUser("Successfully un-registered for notifications", NotifyType.StatusMessage);
+                    }
+                    else
+                    {
+                        rootPage.NotifyUser($"Error un-registering for notifications: {result}", NotifyType.ErrorMessage);
+                    }
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    // This usually happens when a device reports that it support notify, but it actually doesn't.
+                    rootPage.NotifyUser(ex.Message, NotifyType.ErrorMessage);
+                }
+            }
+
+
+
+
+
         }
 
         private async void CharacteristicWriteButtonInt_Click()
@@ -570,6 +664,10 @@ namespace SDKTemplate
             return "Unknown format";
         }
 
+        static List<string> stringrr = new List<string>();
+
+
+
         /// <summary>
         /// Process the raw data received from the device into application usable data,
         /// according the the Bluetooth Heart Rate Profile.
@@ -585,6 +683,13 @@ namespace SDKTemplate
 
             byte flags = data[0];
             bool isHeartRateValueSizeLong = ((flags & heartRateValueFormat) != 0);
+
+            int datalength = data.Length;
+            if(datalength>=5)
+            {
+                stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
+            }
+            
 
             if (isHeartRateValueSizeLong)
             {
