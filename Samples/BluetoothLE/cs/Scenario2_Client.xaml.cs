@@ -13,6 +13,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using Windows.UI.Popups;
+using Windows.Storage.Provider;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
@@ -462,6 +466,29 @@ namespace SDKTemplate
                 () => CharacteristicLatestValue.Text = message);
         }
 
+        private async void SaveToCsv(string string1)
+        {
+           
+                FolderPicker folderPicker = new FolderPicker();
+                folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                folderPicker.FileTypeFilter.Add("*");
+
+                StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+                if (folder != null)
+                {
+
+                    //  do Things On Folder
+
+                }
+                else
+                {
+                    MessageDialog dialog = new MessageDialog("you selected nothing");
+                    await dialog.ShowAsync();
+                }
+
+        }
+
+
         private string FormatValueByPresentation(IBuffer buffer, GattPresentationFormat format)
         {
             // BT_Code: For the purpose of this sample, this function converts only UInt32 and
@@ -498,7 +525,19 @@ namespace SDKTemplate
                 {
                     try
                     {
-                        return "Heart Rate: " + ParseHeartRateValue(data).ToString();
+                        string gesuchterWert = ParseHeartRateValue(data).ToString();
+                        SaveToCsv(gesuchterWert);
+
+
+
+
+
+
+
+
+
+                        return "Heart Rate: " + gesuchterWert;
+
                     }
                     catch (ArgumentException)
                     {
@@ -566,14 +605,21 @@ namespace SDKTemplate
 
             byte flags = data[0];
             bool isHeartRateValueSizeLong = ((flags & heartRateValueFormat) != 0);
-
-            if (isHeartRateValueSizeLong)
-            {
-                return BitConverter.ToUInt16(data, 1);
+            if(data.Length >= 5) 
+            { 
+                if (isHeartRateValueSizeLong)
+                {
+                    return BitConverter.ToUInt16(data, 4);
+                }
+                else
+                {
+                    return data[4];
+                }
             }
             else
             {
-                return data[1];
+                ushort test1 = 0;
+                return test1;
             }
         }
     }
