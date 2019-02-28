@@ -212,7 +212,7 @@ namespace SDKTemplate
 
         private void AddValueChangedHandler()
         {
-            ValueChangedSubscribeToggle.Content = "Unsubscribe from value changes";
+            ValueChangedSubscribeToggle.Content = "Stop measurements and save RR intervals to a CSV file";
             if (!subscribedForNotifications)
             {
                 registeredCharacteristic = selectedCharacteristic;
@@ -342,63 +342,48 @@ namespace SDKTemplate
             {
                 // Application now has read/write access to the picked file
                 // this.textBlock.Text = "Picked photo: " + file.Name;
+                string strFilePath = file.Path;
+
+                Csvwriter writer1 = new Csvwriter();
+
+
+
+                //writer1.writecsv(strFilePath, stringrr);
+
+                string strSeperator = ",";
+                StringBuilder sbOutput = new StringBuilder();
+
+
+                string[] dataarray = stringrr.ToArray();
+                int datalength = dataarray.Length;
+
+                string[] timearray = timelist.ToArray();
+
+                string[] combinedarray = new string[datalength];
+                for (int j = 0; j < datalength; j++)
+                {
+                    combinedarray[j] = dataarray[j] + " " + strSeperator + " " + timearray[j];
+                }
+
+
+                string[] nullarray = new string[1];
+                nullarray[0] = "";
+
+                await Windows.Storage.FileIO.WriteTextAsync(file, "RR intervals [ms]");
+                await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
+                await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
+
+
+
+                await Windows.Storage.FileIO.AppendLinesAsync(file, combinedarray);
+
             }
             else
             {
                 //this.textBlock.Text = "Operation cancelled.";
             }
 
-            string strFilePath = file.Path;
-
-            Csvwriter writer1 = new Csvwriter();
             
-
-            
-            //writer1.writecsv(strFilePath, stringrr);
-
-            string strSeperator = ",";
-            StringBuilder sbOutput = new StringBuilder();
-           
-
-            string[] dataarray = stringrr.ToArray();
-            int datalength = dataarray.Length;
-
-            string[] timearray = timelist.ToArray();
-
-            string[] combinedarray = new string[datalength];
-            for(int j = 0; j<datalength; j++)
-            {
-                combinedarray[j] = dataarray[j] +" "+ strSeperator +" "+ timearray[j];
-            }
-
-            /*
-            for (int i = 0; i < datalength; i++)
-            {
-                sbOutput.AppendLine(string.Join(strSeperator, combinedarray[i]));
-            }
-            */
-            string[] nullarray = new string[1];
-            nullarray[0] = "";
-
-            await Windows.Storage.FileIO.WriteTextAsync(file, "RR intervals [ms]");
-            await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
-            await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
-        
-            
-
-            await Windows.Storage.FileIO.AppendLinesAsync(file, combinedarray);
-            
-
-
-
-
-
-
-
-
-
-
-
         }
 
         private async void CharacteristicWriteButtonInt_Click()
@@ -483,7 +468,7 @@ namespace SDKTemplate
                     if (status == GattCommunicationStatus.Success)
                     {
                         AddValueChangedHandler();
-                        rootPage.NotifyUser("Successfully subscribed for value changes", NotifyType.StatusMessage);
+                        rootPage.NotifyUser("Measurements started", NotifyType.StatusMessage);
                     }
                     else
                     {
@@ -511,7 +496,7 @@ namespace SDKTemplate
                     {
                         subscribedForNotifications = false;
                         RemoveValueChangedHandler();
-                        rootPage.NotifyUser("Successfully un-registered for notifications", NotifyType.StatusMessage);
+                        rootPage.NotifyUser("Measurements ended", NotifyType.StatusMessage);
                     }
                     else
                     {
@@ -531,7 +516,7 @@ namespace SDKTemplate
             // BT_Code: An Indicate or Notify reported that the value has changed.
             // Display the new value with a timestamp.
             var newValue = FormatValueByPresentation(args.CharacteristicValue, presentationFormat);
-            var message = $"Value at {DateTime.Now:hh:mm:ss.FFF}: {newValue}";
+            var message =  $"Values at {DateTime.Now:hh:mm:ss.FFF}: \r\n {newValue} beats/minute \r\n RR interval length: {stringrr[stringrr.Count-1]} ms";
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                 () => CharacteristicLatestValue.Text = message);
         }
@@ -645,33 +630,6 @@ namespace SDKTemplate
             const byte rrflagbit = 0x10;
             const byte energyflagbit = 0x08;
             byte flags = data[0];
-            /*
-            const byte bit0 = 0x00;
-            const byte bit1 = 0x01;
-            const byte bit2 = 0x02;
-            const byte bit3 = 0x03;
-            const byte bit4 = 0x04;
-            const byte bit5 = 0x05;
-            const byte bit6 = 0x06;
-            const byte bit7 = 0x07;
-            const byte bit8 = 0x08;
-
-            bool isbit0present = ((flags & bit0) != 0);
-            bool isbit1present = ((flags & bit1) != 0);
-            bool isbit2present = ((flags & bit2) != 0);
-            bool isbit3present = ((flags & bit3) != 0);
-            bool isbit4present = ((flags & bit4) != 0);
-            bool isbit5present = ((flags & bit5) != 0);
-            bool isbit6present = ((flags & bit6) != 0);
-            bool isbit7present = ((flags & bit7) != 0);
-            bool isbit8present = ((flags & bit8) != 0);
-
-            string teststring = Convert.ToString(flags, 2).PadLeft(8, '0');
-
-
-            */
-            //
-
 
 
             bool isHeartRateValueSizeLong = ((flags & heartRateValueFormat) != 0);

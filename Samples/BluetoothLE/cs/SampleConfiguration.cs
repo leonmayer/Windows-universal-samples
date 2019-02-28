@@ -19,7 +19,7 @@ namespace SDKTemplate
 {
     public partial class MainPage : Page
     {
-        public const string FEATURE_NAME = "Bluetooth Low Energy C# Sample";
+        public const string FEATURE_NAME = "RWTH Aachen University";
 
         List<Scenario> scenarios = new List<Scenario>
         {
