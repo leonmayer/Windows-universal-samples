@@ -642,14 +642,81 @@ namespace SDKTemplate
         {
             // Heart Rate profile defined flag values
             const byte heartRateValueFormat = 0x01;
-
+            const byte rrflagbit = 0x05;
+            const byte energyflagbit = 0x04;
             byte flags = data[0];
+            //
+            const byte bit0 = 0x00;
+            const byte bit1 = 0x01;
+            const byte bit2 = 0x02;
+            const byte bit3 = 0x03;
+            const byte bit4 = 0x04;
+            const byte bit5 = 0x05;
+            const byte bit6 = 0x06;
+            const byte bit7 = 0x07;
+            const byte bit8 = 0x08;
+
+            bool isbit0present = ((flags & bit0) != 0);
+            bool isbit1present = ((flags & bit1) != 0);
+            bool isbit2present = ((flags & bit2) != 0);
+            bool isbit3present = ((flags & bit3) != 0);
+            bool isbit4present = ((flags & bit4) != 0);
+            bool isbit5present = ((flags & bit5) != 0);
+            bool isbit6present = ((flags & bit6) != 0);
+            bool isbit7present = ((flags & bit7) != 0);
+            bool isbit8present = ((flags & bit8) != 0);
+
+            string teststring = Convert.ToString(flags, 2).PadLeft(8, '0');
+
+
+            //
+
+
+
             bool isHeartRateValueSizeLong = ((flags & heartRateValueFormat) != 0);
 
+            bool isrrpresent = ((flags & rrflagbit) != 0);
+            bool isenergyflagbitpresent = ((flags & energyflagbit) != 0);
+
             int datalength = data.Length;
-            if(datalength>=5)
+            int bytescombined = 0;
+
+            if(isrrpresent)
             {
-                stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
+                if (isenergyflagbitpresent == false)
+                {
+                    if(isHeartRateValueSizeLong == false)
+                    {
+                        bytescombined = BitConverter.ToUInt16(data, 2);
+                    }
+                    else
+                    {
+                        bytescombined = BitConverter.ToUInt16(data, 3);
+                    }
+                }
+                else
+                {
+                    if(isHeartRateValueSizeLong == false)
+                    {
+                        bytescombined = BitConverter.ToUInt16(data, 3);
+                    }
+                    else
+                    {
+                        bytescombined = BitConverter.ToUInt16(data, 4);
+                    }
+                }
+
+
+                
+            
+                double bytescombined2 = Convert.ToDouble(bytescombined);
+                double bytescombined3 = bytescombined2 / 1024;
+                double bytescombined4 = bytescombined3 * 1000;
+
+
+
+                //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
+                stringrr.Add(bytescombined.ToString());
                 timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
             }
             
