@@ -380,7 +380,7 @@ namespace SDKTemplate
             string[] nullarray = new string[1];
             nullarray[0] = "";
 
-            await Windows.Storage.FileIO.WriteTextAsync(file, "RR intervals");
+            await Windows.Storage.FileIO.WriteTextAsync(file, "RR intervals [ms]");
             await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
             await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
         
@@ -642,10 +642,10 @@ namespace SDKTemplate
         {
             // Heart Rate profile defined flag values
             const byte heartRateValueFormat = 0x01;
-            const byte rrflagbit = 0x05;
-            const byte energyflagbit = 0x04;
+            const byte rrflagbit = 0x10;
+            const byte energyflagbit = 0x08;
             byte flags = data[0];
-            //
+            /*
             const byte bit0 = 0x00;
             const byte bit1 = 0x01;
             const byte bit2 = 0x02;
@@ -669,6 +669,7 @@ namespace SDKTemplate
             string teststring = Convert.ToString(flags, 2).PadLeft(8, '0');
 
 
+            */
             //
 
 
@@ -716,7 +717,7 @@ namespace SDKTemplate
 
 
                 //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
-                stringrr.Add(bytescombined.ToString());
+                stringrr.Add(bytescombined4.ToString());
                 timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
             }
             
