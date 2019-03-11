@@ -41,7 +41,7 @@
     <ScrollViewer Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="12,10,12,12">
         <StackPanel>
             <TextBlock Text="Measure and save interbeat intervals" Style="{StaticResource SampleHeaderTextStyle}"/>
-            <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text="RWTH Aachen Medit"/>
+            <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text=""/>
             <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
                 This scenario connects to the Bluetooth Low Energy device
                 selected in the "Discover GATT Servers" scenario
