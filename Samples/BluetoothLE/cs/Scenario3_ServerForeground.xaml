@@ -40,7 +40,7 @@
     </Page.Resources>
     <ScrollViewer Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="12,10,12,12">
         <StackPanel>
-            <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
+            <TextBlock Text="Choose device" Style="{StaticResource SampleHeaderTextStyle}"/>
             <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text="Publish the calculator service"/>
             <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
                 This scenario allows the system to publish a calculator service.  

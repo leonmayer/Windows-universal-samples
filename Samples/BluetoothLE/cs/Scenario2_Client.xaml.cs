@@ -14,12 +14,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
 using Windows.Security.Cryptography;
+using Windows.Storage;
+using Windows.Storage.Provider;
 using Windows.Storage.Streams;
+using Windows.Storage.Pickers;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -211,7 +215,7 @@ namespace SDKTemplate
 
         private void AddValueChangedHandler()
         {
-            ValueChangedSubscribeToggle.Content = "Unsubscribe from value changes";
+            ValueChangedSubscribeToggle.Content = "Stop measurements and save RR intervals to a CSV file";
             if (!subscribedForNotifications)
             {
                 registeredCharacteristic = selectedCharacteristic;
@@ -328,6 +332,141 @@ namespace SDKTemplate
             }
         }
 
+        private bool subscribedforcsvnotifications = false;
+        private async void CharacteristicSaveButton_Click()
+        {
+            /*
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            picker.FileTypeFilter.Add(".csv");
+
+            Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                // Application now has read/write access to the picked file
+                // this.textBlock.Text = "Picked photo: " + file.Name;
+                string strFilePath = file.Path;
+
+                Csvwriter writer1 = new Csvwriter();
+
+
+
+                //writer1.writecsv(strFilePath, stringrr);
+
+                string strSeperator = ",";
+                StringBuilder sbOutput = new StringBuilder();
+
+
+                string[] dataarray = stringrr.ToArray();
+                int datalength = dataarray.Length;
+
+                string[] timearray = timelist.ToArray();
+
+                string[] combinedarray = new string[datalength];
+                for (int j = 0; j < datalength; j++)
+                {
+                    combinedarray[j] = dataarray[j] + " " + strSeperator + " " + timearray[j];
+                }
+
+
+                string[] nullarray = new string[1];
+                nullarray[0] = "";
+
+                await Windows.Storage.FileIO.WriteTextAsync(file, "RR intervals [ms]");
+                await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
+                await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
+
+
+
+                await Windows.Storage.FileIO.AppendLinesAsync(file, combinedarray);
+
+            }
+            else
+            {
+                //this.textBlock.Text = "Operation cancelled.";
+            }
+            */
+            FileSavePicker savePicker = new FileSavePicker();
+            savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            // Dropdown of file types the user can save the file as
+            savePicker.FileTypeChoices.Add("Plain Text", new List<string>() { ".csv" });
+            // Default file name if the user does not type one in or select a file to replace
+            savePicker.SuggestedFileName = "RRintervals_1";
+
+            StorageFile file = await savePicker.PickSaveFileAsync();
+            if (file != null)
+            {
+                // Prevent updates to the remote version of the file until we finish making changes and call CompleteUpdatesAsync.
+                CachedFileManager.DeferUpdates(file);
+                // write to file
+                await FileIO.WriteTextAsync(file, file.Name);
+                // Let Windows know that we're finished changing the file so the other app can update the remote version of the file.
+                // Completing updates may require Windows to ask for user input.
+                FileUpdateStatus status = await CachedFileManager.CompleteUpdatesAsync(file);
+                if (status == FileUpdateStatus.Complete)
+                {
+                    //OutputTextBlock.Text = "File " + file.Name + " was saved.";
+
+
+                    // Application now has read/write access to the picked file
+                    // this.textBlock.Text = "Picked photo: " + file.Name;
+                    string strFilePath = file.Path;
+
+                    Csvwriter writer1 = new Csvwriter();
+
+
+
+                    //writer1.writecsv(strFilePath, stringrr);
+
+                    string strSeperator = ",";
+                    StringBuilder sbOutput = new StringBuilder();
+
+
+                    string[] dataarray = stringrr.ToArray();
+                    int datalength = dataarray.Length;
+
+                    string[] timearray = timelist.ToArray();
+
+                    string[] combinedarray = new string[datalength];
+                    for (int j = 0; j < datalength; j++)
+                    {
+                        combinedarray[j] = dataarray[j] + " " + strSeperator + " " + timearray[j];
+                    }
+
+
+                    string[] nullarray = new string[1];
+                    nullarray[0] = "";
+
+                    await Windows.Storage.FileIO.WriteTextAsync(file, "RR intervals [ms], time [hh:mm:ss]");
+                    await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
+                    await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
+
+
+                     
+                    await Windows.Storage.FileIO.AppendLinesAsync(file, combinedarray);
+
+                    stringrr.Clear();
+                    timelist.Clear();
+
+
+
+
+
+                }
+                else
+                {
+                    //OutputTextBlock.Text = "File " + file.Name + " couldn't be saved.";
+                }
+            }
+            else
+            {
+                //OutputTextBlock.Text = "Operation cancelled.";
+            }
+
+
+        }
+
         private async void CharacteristicWriteButtonInt_Click()
         {
             if (!String.IsNullOrEmpty(CharacteristicWriteValue.Text))
@@ -410,7 +549,7 @@ namespace SDKTemplate
                     if (status == GattCommunicationStatus.Success)
                     {
                         AddValueChangedHandler();
-                        rootPage.NotifyUser("Successfully subscribed for value changes", NotifyType.StatusMessage);
+                        rootPage.NotifyUser("Measurements started", NotifyType.StatusMessage);
                     }
                     else
                     {
@@ -427,6 +566,7 @@ namespace SDKTemplate
             {
                 try
                 {
+                    CharacteristicSaveButton_Click();
                     // BT_Code: Must write the CCCD in order for server to send notifications.
                     // We receive them in the ValueChanged event handler.
                     // Note that this sample configures either Indicate or Notify, but not both.
@@ -437,7 +577,7 @@ namespace SDKTemplate
                     {
                         subscribedForNotifications = false;
                         RemoveValueChangedHandler();
-                        rootPage.NotifyUser("Successfully un-registered for notifications", NotifyType.StatusMessage);
+                        rootPage.NotifyUser("Measurements ended", NotifyType.StatusMessage);
                     }
                     else
                     {
@@ -457,7 +597,7 @@ namespace SDKTemplate
             // BT_Code: An Indicate or Notify reported that the value has changed.
             // Display the new value with a timestamp.
             var newValue = FormatValueByPresentation(args.CharacteristicValue, presentationFormat);
-            var message = $"Value at {DateTime.Now:hh:mm:ss.FFF}: {newValue}";
+            var message =  $"Values at {DateTime.Now:hh:mm:ss.FFF}: \r\n{newValue} beats/minute \r\nRR interval length: {stringrr[stringrr.Count-1]} ms";
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                 () => CharacteristicLatestValue.Text = message);
         }
@@ -551,6 +691,11 @@ namespace SDKTemplate
             return "Unknown format";
         }
 
+        static List<string> stringrr = new List<string>();
+        static List<string> timelist = new List<string>();
+
+
+
         /// <summary>
         /// Process the raw data received from the device into application usable data,
         /// according the the Bluetooth Heart Rate Profile.
@@ -563,9 +708,173 @@ namespace SDKTemplate
         {
             // Heart Rate profile defined flag values
             const byte heartRateValueFormat = 0x01;
-
+            const byte rrflagbit = 0x10;
+            const byte energyflagbit = 0x08;
             byte flags = data[0];
+
+
             bool isHeartRateValueSizeLong = ((flags & heartRateValueFormat) != 0);
+
+            bool isrrpresent = ((flags & rrflagbit) != 0);
+            bool isenergyflagbitpresent = ((flags & energyflagbit) != 0);
+
+            int datalength = data.Length;
+            int bytescombined = 0;
+
+            if(isrrpresent)
+            {
+                if (isenergyflagbitpresent == false)
+                {
+                    if(isHeartRateValueSizeLong == false)
+                    {
+                        bytescombined = BitConverter.ToUInt16(data, 2);
+                    }
+                    else
+                    {
+                        bytescombined = BitConverter.ToUInt16(data, 3);
+                    }
+                }
+                else
+                {
+                    if(isHeartRateValueSizeLong == false)
+                    {
+                        bytescombined = BitConverter.ToUInt16(data, 3);
+                    }
+                    else
+                    {
+                        bytescombined = BitConverter.ToUInt16(data, 4);
+                    }
+                }
+
+               
+
+
+                
+            
+                double bytescombined2 = Convert.ToDouble(bytescombined);
+                double bytescombined3 = bytescombined2 / 1024;
+                double bytescombined4 = bytescombined3 * 1000;
+
+
+
+                //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
+                stringrr.Add(bytescombined4.ToString());
+                timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+
+
+
+                double longbytescombined;
+                if (datalength >= 6)
+                {
+                    if (isenergyflagbitpresent == false)
+                    {
+                        if (isHeartRateValueSizeLong == false)
+                        {
+                            longbytescombined = BitConverter.ToUInt16(data, 4);
+                        }
+                        else
+                        {
+                            longbytescombined = BitConverter.ToUInt16(data, 5);
+                        }
+                    }
+                    else
+                    {
+                        if (isHeartRateValueSizeLong == false)
+                        {
+                            longbytescombined = BitConverter.ToUInt16(data, 5);
+                        }
+                        else
+                        {
+                            longbytescombined = BitConverter.ToUInt16(data, 6);
+                        }
+                    }
+                    double longbytescombined2 = Convert.ToDouble(longbytescombined);
+                    double longbytescombined3 = longbytescombined2 / 1024;
+                    double longbytescombined4 = longbytescombined3 * 1000;
+
+
+
+                    //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
+                    stringrr.Add(longbytescombined4.ToString());
+                    timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+
+                }
+
+                double values3bytescombined;
+                if (datalength >= 8)
+                {
+                    if (isenergyflagbitpresent == false)
+                    {
+                        if (isHeartRateValueSizeLong == false)
+                        {
+                            values3bytescombined = BitConverter.ToUInt16(data, 6);
+                        }
+                        else
+                        {
+                            values3bytescombined = BitConverter.ToUInt16(data, 7);
+                        }
+                    }
+                    else
+                    {
+                        if (isHeartRateValueSizeLong == false)
+                        {
+                            values3bytescombined = BitConverter.ToUInt16(data, 7);
+                        }
+                        else
+                        {
+                            values3bytescombined = BitConverter.ToUInt16(data, 8);
+                        }
+                    }
+                    double values3bytescombined2 = Convert.ToDouble(values3bytescombined);
+                    double values3bytescombined3 = values3bytescombined2 / 1024;
+                    double values3bytescombined4 = values3bytescombined3 * 1000;
+
+
+
+                    //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
+                    stringrr.Add(values3bytescombined4.ToString());
+                    timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+
+                }
+
+                double values4bytescombined;
+                if (datalength >= 10)
+                {
+                    if (isenergyflagbitpresent == false)
+                    {
+                        if (isHeartRateValueSizeLong == false)
+                        {
+                            values4bytescombined = BitConverter.ToUInt16(data, 8);
+                        }
+                        else
+                        {
+                            values4bytescombined = BitConverter.ToUInt16(data, 9);
+                        }
+                    }
+                    else
+                    {
+                        if (isHeartRateValueSizeLong == false)
+                        {
+                            values4bytescombined = BitConverter.ToUInt16(data, 9);
+                        }
+                        else
+                        {
+                            values4bytescombined = BitConverter.ToUInt16(data, 10);
+                        }
+                    }
+                    double values4bytescombined2 = Convert.ToDouble(values4bytescombined);
+                    double values4bytescombined3 = values4bytescombined2 / 1024;
+                    double values4bytescombined4 = values4bytescombined3 * 1000;
+
+
+
+                    //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
+                    stringrr.Add(values4bytescombined4.ToString());
+                    timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+
+                }
+            }
+            
 
             if (isHeartRateValueSizeLong)
             {
@@ -576,5 +885,67 @@ namespace SDKTemplate
                 return data[1];
             }
         }
+
+     
+    }
+    public class Csvwriter
+    {
+        public async void writecsv(string strFilePath, List<string> datalist)
+        {
+
+            //bool adf = File.Exists(strFilePath);
+            string strSeperator = ",";
+            StringBuilder sbOutput = new StringBuilder();
+            /*
+            int[][] inaOutput = new int[][]{
+        new int[]{1000, 2000, 3000, 4000, 5000},
+        new int[]{6000, 7000, 8000, 9000, 10000},
+        new int[]{11000, 12000, 13000, 14000, 15000}
+                };
+            int ilength = inaOutput.GetLength(0);
+            for (int i = 0; i < ilength; i++)
+                sbOutput.AppendLine(string.Join(strSeperator, inaOutput[i]));*/
+
+            string[] dataarray = datalist.ToArray();
+            int ilength = dataarray.Length;
+            for (int i = 0; i < ilength; i++)
+            {
+                sbOutput.AppendLine(string.Join(strSeperator, dataarray[i]));
+            }
+            //await Windows.Storage.FileIO.WriteTextAsync(file, string);
+
+
+
+            // Create and write the csv file
+            
+            await Task.Run(() =>
+            {
+                Task.Yield();
+                File.WriteAllText(strFilePath, sbOutput.ToString());
+            });
+            //File.WriteAllText(strFilePath, sbOutput.ToString());
+
+            // To append more lines to the csv file
+            //int illa = 0;
+            //for (illa = 1; illa < 5; illa++)
+            //    File.AppendAllText(strFilePath, sbOutput.ToString());
+        }
     }
 }
+//string strFilePath = @"C:\Users\Leon\Desktop\testtest.csv"; ;
+//string strSeperator = ",";
+//StringBuilder sbOutput = new StringBuilder();
+
+//if (3 < data.GetLength(0))
+//{
+//double abcd = BitConverter.ToDouble(data, 2);
+//string vOut = BitConverter.ToString(data, 2, 1);
+//string vOut = Convert.ToString(BitConverter.ToDouble(data, 2 /* Which byte position to convert */));
+//sbOutput.AppendLine(string.Join(strSeperator, vOut));
+
+// Create and write the csv file
+//File.WriteAllText(strFilePath, sbOutput.ToString());
+
+// To append more lines to the csv file
+//File.AppendAllText(strFilePath, sbOutput.ToString());
+//}

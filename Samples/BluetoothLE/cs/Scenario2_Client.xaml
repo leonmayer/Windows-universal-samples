@@ -40,12 +40,13 @@
     </Page.Resources>
     <ScrollViewer Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="12,10,12,12">
         <StackPanel>
-            <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
-            <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text="Query services from GATT server"/>
+            <TextBlock Text="Measure and save interbeat intervals" Style="{StaticResource SampleHeaderTextStyle}"/>
+            <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text=""/>
             <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
                 This scenario connects to the Bluetooth Low Energy device
                 selected in the "Discover GATT Servers" scenario
                 and communicates with the device.
+                To measure the RR intervals, please click on 'Connect' and then choose 'HeartRate' and 'HeartRateMeasurement'
             </TextBlock>
             <TextBlock Style="{StaticResource ListItemTextStyle}" TextWrapping="Wrap" Margin="0,10,0,0">
                 Selected device: <Run Text="{x:Bind rootPage.SelectedBleDeviceName}" FontWeight="Bold"/>
@@ -60,13 +61,14 @@
             <StackPanel Orientation="Horizontal">
                 <Button x:Name="CharacteristicReadButton" Content="Read Value" Click="{x:Bind CharacteristicReadButton_Click}"
                         Visibility="Collapsed" Margin="0,10,10,0"/>
-                <Button x:Name="ValueChangedSubscribeToggle" Content="Subscribe to value changes" Click="{x:Bind ValueChangedSubscribeToggle_Click}"
+                <Button x:Name="ValueChangedSubscribeToggle" Content="Start measurements" Click="{x:Bind ValueChangedSubscribeToggle_Click}"
                         Visibility="Collapsed" Margin="0,10,10,0"/>
             </StackPanel>
-            <StackPanel x:Name="CharacteristicWritePanel" Margin="0,10,0,0" Visibility="Visible">
-                <TextBox x:Name="CharacteristicWriteValue" PlaceholderText="Enter text/number to send"/>
-                <Button Content="Write Value as Number" Click="{x:Bind CharacteristicWriteButtonInt_Click}" Margin="0,10,0,0"/>
-                <Button Content="Write Value as UTF-8" Click="{x:Bind CharacteristicWriteButton_Click}" Margin="0,10,0,0"/>
+            <StackPanel x:Name="CharacteristicWritePanel" Margin="0,10,0,0" Visibility="Collapsed">
+                <TextBox x:Name="CharacteristicWriteValue" PlaceholderText="Enter text/number to send" Visibility="Collapsed"/>
+                <Button Content="Write Value as Number" Click="{x:Bind CharacteristicWriteButtonInt_Click}" Margin="0,10,0,0" Visibility="Collapsed"/>
+                <Button Content="Write Value as UTF-8" Click="{x:Bind CharacteristicWriteButton_Click}" Margin="0,10,0,0" Visibility="Collapsed"/> 
+                <!-- <Button Content="Save interval data to csv" Click="{x:Bind Path=CharacteristicSaveButton_Click}" Margin="0,10,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"/> -->
             </StackPanel>
             <TextBlock x:Name="CharacteristicLatestValue" Margin="0,10,0,0"/>
         </StackPanel>
