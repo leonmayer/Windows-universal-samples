@@ -24,6 +24,13 @@
           </uap:ShowNameOnTiles>
         </uap:DefaultTile>
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="daqtofile">
+            <uap:DisplayName>daqtofile</uap:DisplayName>
+          </uap:Protocol>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
   <Capabilities>

@@ -29,6 +29,17 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
+
+//using System.Drawing;
+//using System.Collections;
+//using System.ComponentModel;
+//using System.Windows.Forms;
+//using System.Data;
+
+//using NationalInstruments.DAQmx;
+
+
+
 namespace SDKTemplate
 {
     // This scenario connects to the device selected in the "Discover
@@ -106,6 +117,7 @@ namespace SDKTemplate
 
         private async void ConnectButton_Click()
         {
+            
             ConnectButton.IsEnabled = false;
 
             if (!await ClearBluetoothLEDeviceAsync())
