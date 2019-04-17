@@ -546,6 +546,11 @@ namespace SDKTemplate
             if (!subscribedForNotifications)
             {
                 // initialize status
+                stringrr.Clear();
+                stringrrfast.Clear();
+                timelist.Clear();
+                timelistfast.Clear();
+
                 GattCommunicationStatus status = GattCommunicationStatus.Unreachable;
                 var cccdValue = GattClientCharacteristicConfigurationDescriptorValue.None;
                 if (selectedCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Indicate))
@@ -784,10 +789,6 @@ namespace SDKTemplate
                         bytescombined = BitConverter.ToUInt16(data, 4);
                     }
                 }
-
-
-
-
 
 
                 double bytescombined2 = Convert.ToDouble(bytescombined);
