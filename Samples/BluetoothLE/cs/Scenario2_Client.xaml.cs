@@ -736,7 +736,7 @@ namespace SDKTemplate
         static List<string> timelist = new List<string>();
         static List<string> stringrrfast = new List<string>();
         static List<string> timelistfast = new List<string>();
-        static int noofelementssaved = 20;
+        static int noofelementssaved = 30;
 
 
 
@@ -802,10 +802,12 @@ namespace SDKTemplate
                 timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                 stringrrfast.Add(bytescombined4.ToString());
                 timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                
                 if ((stringrrfast.Count % noofelementssaved) == 0)
                 {
                     SaveDatatoCSV();
                 }
+                
 
                 //SaveDatatoCSV(bytescombined4.ToString(), $"{DateTime.Now:hh:mm:ss.FFF}");
 
@@ -845,10 +847,12 @@ namespace SDKTemplate
                     timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                     stringrrfast.Add(longbytescombined4.ToString());
                     timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                    
                     if ((stringrrfast.Count % noofelementssaved) == 0)
                     {
                         SaveDatatoCSV();
                     }
+                    
                     //SaveDatatoCSV(longbytescombined4.ToString(), $"{DateTime.Now:hh:mm:ss.FFF}");
                 }
 
@@ -888,10 +892,12 @@ namespace SDKTemplate
                     timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                     stringrrfast.Add(values3bytescombined4.ToString());
                     timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                    
                     if ((stringrrfast.Count % noofelementssaved) == 0)
                     {
                         SaveDatatoCSV();
                     }
+                    
                     //SaveDatatoCSV(values3bytescombined4.ToString(), $"{DateTime.Now:hh:mm:ss.FFF}");
                 }
 
@@ -937,6 +943,7 @@ namespace SDKTemplate
                     {
                         SaveDatatoCSV();
                     }
+                    
                 }
                
             }
@@ -954,6 +961,7 @@ namespace SDKTemplate
 
         static string testtoken = "wrong";
 
+
         public static async void SaveDatatoCSV()
         {
             StorageFile file1 = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(testtoken);
@@ -964,10 +972,12 @@ namespace SDKTemplate
 
             //int datalength = stringrrfast.Count;
             //int timelength = timelistfast.Count;
-            string[] dataarray = new string[noofelementssaved];
-            string[] timearray = new string[noofelementssaved];
+            int noofdatapoints = stringrrfast.Count;
+            string[] dataarray = new string[noofdatapoints];
+            string[] timearray = new string[noofdatapoints];
+        
 
-            for(int i = 0; i<noofelementssaved; i++)
+            for(int i = 0; i<noofdatapoints; i++)
             {
                 dataarray[i] = stringrrfast[i];
                 timearray[i] = timelistfast[i];
@@ -979,14 +989,14 @@ namespace SDKTemplate
 
             //string[] timearray = timelist.ToArray();
 
-            string[] combinedarray = new string[noofelementssaved];
+            string[] combinedarray = new string[noofdatapoints];
             
-            for (int j = 0; j < noofelementssaved; j++)
+            for (int j = 0; j < noofdatapoints; j++)
             {
                 combinedarray[j] = dataarray[j] + " " + strSeperator + " " + timearray[j];
             }
 
-            
+
             //string[] combinedstring = new string[1];
             //combinedstring[0] = rrstring + " " + strSeperator + " " + datestring;
 
@@ -998,8 +1008,11 @@ namespace SDKTemplate
             //await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
 
 
-
-            await Windows.Storage.FileIO.AppendLinesAsync(file1, combinedarray);
+            FileUpdateStatus status = await CachedFileManager.CompleteUpdatesAsync(file1);
+            if (status == FileUpdateStatus.Complete)
+            {
+                await Windows.Storage.FileIO.AppendLinesAsync(file1, combinedarray);
+            }
         }
         public static async void SaveDatatoCSV(string rrstring, string datestring)
         {
