@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Text;
 using System.IO;
 using System.Threading.Tasks;
+using System.Linq;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
@@ -28,6 +29,18 @@ using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using Windows.Storage.AccessCache;
+
+
+//using System.Drawing;
+//using System.Collections;
+//using System.ComponentModel;
+//using System.Windows.Forms;
+//using System.Data;
+
+//using NationalInstruments.DAQmx;
+
+
 
 namespace SDKTemplate
 {
@@ -106,6 +119,7 @@ namespace SDKTemplate
 
         private async void ConnectButton_Click()
         {
+
             ConnectButton.IsEnabled = false;
 
             if (!await ClearBluetoothLEDeviceAsync())
@@ -392,7 +406,7 @@ namespace SDKTemplate
             // Dropdown of file types the user can save the file as
             savePicker.FileTypeChoices.Add("Plain Text", new List<string>() { ".csv" });
             // Default file name if the user does not type one in or select a file to replace
-            savePicker.SuggestedFileName = "RRintervals_1";
+            savePicker.SuggestedFileName = "RRintervals_post_1";
 
             StorageFile file = await savePicker.PickSaveFileAsync();
             if (file != null)
@@ -413,7 +427,7 @@ namespace SDKTemplate
                     // this.textBlock.Text = "Picked photo: " + file.Name;
                     string strFilePath = file.Path;
 
-                    Csvwriter writer1 = new Csvwriter();
+                    //Csvwriter writer1 = new Csvwriter();
 
 
 
@@ -443,7 +457,7 @@ namespace SDKTemplate
                     await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
 
 
-                     
+
                     await Windows.Storage.FileIO.AppendLinesAsync(file, combinedarray);
 
                     stringrr.Clear();
@@ -456,11 +470,15 @@ namespace SDKTemplate
                 }
                 else
                 {
+                    stringrr.Clear();
+                    timelist.Clear();
                     //OutputTextBlock.Text = "File " + file.Name + " couldn't be saved.";
                 }
             }
             else
             {
+                stringrr.Clear();
+                timelist.Clear();
                 //OutputTextBlock.Text = "Operation cancelled.";
             }
 
@@ -528,6 +546,11 @@ namespace SDKTemplate
             if (!subscribedForNotifications)
             {
                 // initialize status
+                stringrr.Clear();
+                stringrrfast.Clear();
+                timelist.Clear();
+                timelistfast.Clear();
+
                 GattCommunicationStatus status = GattCommunicationStatus.Unreachable;
                 var cccdValue = GattClientCharacteristicConfigurationDescriptorValue.None;
                 if (selectedCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Indicate))
@@ -548,6 +571,21 @@ namespace SDKTemplate
 
                     if (status == GattCommunicationStatus.Success)
                     {
+                        FileSavePicker savePicker1 = new FileSavePicker();
+                        savePicker1.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                        // Dropdown of file types the user can save the file as
+                        savePicker1.FileTypeChoices.Add("Plain Text", new List<string>() { ".csv" });
+                        // Default file name if the user does not type one in or select a file to replace
+                        savePicker1.SuggestedFileName = "RRintervals_pre_1";
+
+                        string[] nullarray = new string[1];
+                        nullarray[0] = "";
+
+                        StorageFile file1 = await savePicker1.PickSaveFileAsync();
+                        await Windows.Storage.FileIO.WriteTextAsync(file1, "RR intervals [ms], time [hh:mm:ss]");
+                        await Windows.Storage.FileIO.AppendLinesAsync(file1, nullarray);
+                        await Windows.Storage.FileIO.AppendLinesAsync(file1, nullarray);
+                        testtoken = StorageApplicationPermissions.FutureAccessList.Add(file1);
                         AddValueChangedHandler();
                         rootPage.NotifyUser("Measurements started", NotifyType.StatusMessage);
                     }
@@ -597,9 +635,12 @@ namespace SDKTemplate
             // BT_Code: An Indicate or Notify reported that the value has changed.
             // Display the new value with a timestamp.
             var newValue = FormatValueByPresentation(args.CharacteristicValue, presentationFormat);
-            var message =  $"Values at {DateTime.Now:hh:mm:ss.FFF}: \r\n{newValue} beats/minute \r\nRR interval length: {stringrr[stringrr.Count-1]} ms";
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                () => CharacteristicLatestValue.Text = message);
+            if (stringrr.Count != 0)
+            { 
+                var message = $"Values at {DateTime.Now:hh:mm:ss.FFF}: \r\n{newValue} beats/minute \r\nRR interval length: {stringrr[stringrr.Count - 1]} ms";
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    () => CharacteristicLatestValue.Text = message);
+            }
         }
 
         private string FormatValueByPresentation(IBuffer buffer, GattPresentationFormat format)
@@ -693,6 +734,9 @@ namespace SDKTemplate
 
         static List<string> stringrr = new List<string>();
         static List<string> timelist = new List<string>();
+        static List<string> stringrrfast = new List<string>();
+        static List<string> timelistfast = new List<string>();
+        static int noofelementssaved = 30;
 
 
 
@@ -721,11 +765,11 @@ namespace SDKTemplate
             int datalength = data.Length;
             int bytescombined = 0;
 
-            if(isrrpresent)
+            if (isrrpresent)
             {
                 if (isenergyflagbitpresent == false)
                 {
-                    if(isHeartRateValueSizeLong == false)
+                    if (isHeartRateValueSizeLong == false)
                     {
                         bytescombined = BitConverter.ToUInt16(data, 2);
                     }
@@ -736,7 +780,7 @@ namespace SDKTemplate
                 }
                 else
                 {
-                    if(isHeartRateValueSizeLong == false)
+                    if (isHeartRateValueSizeLong == false)
                     {
                         bytescombined = BitConverter.ToUInt16(data, 3);
                     }
@@ -746,11 +790,7 @@ namespace SDKTemplate
                     }
                 }
 
-               
 
-
-                
-            
                 double bytescombined2 = Convert.ToDouble(bytescombined);
                 double bytescombined3 = bytescombined2 / 1024;
                 double bytescombined4 = bytescombined3 * 1000;
@@ -760,8 +800,16 @@ namespace SDKTemplate
                 //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
                 stringrr.Add(bytescombined4.ToString());
                 timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                stringrrfast.Add(bytescombined4.ToString());
+                timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                
+                if ((stringrrfast.Count % noofelementssaved) == 0)
+                {
+                    SaveDatatoCSV();
+                }
+                
 
-
+                //SaveDatatoCSV(bytescombined4.ToString(), $"{DateTime.Now:hh:mm:ss.FFF}");
 
                 double longbytescombined;
                 if (datalength >= 6)
@@ -797,7 +845,15 @@ namespace SDKTemplate
                     //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
                     stringrr.Add(longbytescombined4.ToString());
                     timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
-
+                    stringrrfast.Add(longbytescombined4.ToString());
+                    timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                    
+                    if ((stringrrfast.Count % noofelementssaved) == 0)
+                    {
+                        SaveDatatoCSV();
+                    }
+                    
+                    //SaveDatatoCSV(longbytescombined4.ToString(), $"{DateTime.Now:hh:mm:ss.FFF}");
                 }
 
                 double values3bytescombined;
@@ -834,7 +890,15 @@ namespace SDKTemplate
                     //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
                     stringrr.Add(values3bytescombined4.ToString());
                     timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
-
+                    stringrrfast.Add(values3bytescombined4.ToString());
+                    timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                    
+                    if ((stringrrfast.Count % noofelementssaved) == 0)
+                    {
+                        SaveDatatoCSV();
+                    }
+                    
+                    //SaveDatatoCSV(values3bytescombined4.ToString(), $"{DateTime.Now:hh:mm:ss.FFF}");
                 }
 
                 double values4bytescombined;
@@ -871,10 +935,19 @@ namespace SDKTemplate
                     //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
                     stringrr.Add(values4bytescombined4.ToString());
                     timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
-
+                    stringrrfast.Add(values4bytescombined4.ToString());
+                    timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                    //SaveDatatoCSV(values4bytescombined4.ToString(), $"{DateTime.Now:hh:mm:ss.FFF}");
+                    
+                    if((stringrrfast.Count % noofelementssaved) == 0)
+                    {
+                        SaveDatatoCSV();
+                    }
+                    
                 }
+               
             }
-            
+
 
             if (isHeartRateValueSizeLong)
             {
@@ -886,8 +959,106 @@ namespace SDKTemplate
             }
         }
 
-     
+        static string testtoken = "wrong";
+
+
+        public static async void SaveDatatoCSV()
+        {
+            StorageFile file1 = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(testtoken);
+            string strFilePath = file1.Path;
+
+            string strSeperator = ",";
+            StringBuilder sbOutput = new StringBuilder();
+
+            //int datalength = stringrrfast.Count;
+            //int timelength = timelistfast.Count;
+            int noofdatapoints = stringrrfast.Count;
+            string[] dataarray = new string[noofdatapoints];
+            string[] timearray = new string[noofdatapoints];
+        
+
+            for(int i = 0; i<noofdatapoints; i++)
+            {
+                dataarray[i] = stringrrfast[i];
+                timearray[i] = timelistfast[i];
+            }
+            stringrrfast.Clear();
+            timelistfast.Clear();
+            //string[] dataarray = stringrr.ToArray();
+            //int datalength = dataarray.Length;
+
+            //string[] timearray = timelist.ToArray();
+
+            string[] combinedarray = new string[noofdatapoints];
+            
+            for (int j = 0; j < noofdatapoints; j++)
+            {
+                combinedarray[j] = dataarray[j] + " " + strSeperator + " " + timearray[j];
+            }
+
+
+            //string[] combinedstring = new string[1];
+            //combinedstring[0] = rrstring + " " + strSeperator + " " + datestring;
+
+            //string[] nullarray = new string[1];
+            //nullarray[0] = "";
+
+            //await Windows.Storage.FileIO.WriteTextAsync(file1, "RR intervals [ms], time [hh:mm:ss]");
+            //await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
+            //await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
+
+
+            FileUpdateStatus status = await CachedFileManager.CompleteUpdatesAsync(file1);
+            if (status == FileUpdateStatus.Complete)
+            {
+                await Windows.Storage.FileIO.AppendLinesAsync(file1, combinedarray);
+            }
+        }
+        public static async void SaveDatatoCSV(string rrstring, string datestring)
+        {
+            StorageFile file1 = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(testtoken);
+            string strFilePath = file1.Path;
+
+            //Csvwriter writer1 = new Csvwriter();
+
+
+
+            //writer1.writecsv(strFilePath, stringrr);
+
+            string strSeperator = ",";
+            StringBuilder sbOutput = new StringBuilder();
+
+
+            //string[] dataarray = stringrr.ToArray();
+            //int datalength = dataarray.Length;
+
+            //string[] timearray = timelist.ToArray();
+
+            //string[] combinedarray = new string[datalength];
+            /*
+            for (int j = 0; j < datalength; j++)
+            {
+                combinedarray[j] = dataarray[j] + " " + strSeperator + " " + timearray[j];
+            }
+            */
+            string[] combinedstring = new string[1];
+            combinedstring[0] = rrstring + " " + strSeperator + " " + datestring;
+
+            string[] nullarray = new string[1];
+            nullarray[0] = "";
+
+            //await Windows.Storage.FileIO.WriteTextAsync(file1, "RR intervals [ms], time [hh:mm:ss]");
+            //await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
+            //await Windows.Storage.FileIO.AppendLinesAsync(file, nullarray);
+
+
+
+            await Windows.Storage.FileIO.AppendLinesAsync(file1, combinedstring);
+        }
+
+
     }
+
     public class Csvwriter
     {
         public async void writecsv(string strFilePath, List<string> datalist)
@@ -917,7 +1088,7 @@ namespace SDKTemplate
 
 
             // Create and write the csv file
-            
+
             await Task.Run(() =>
             {
                 Task.Yield();
@@ -932,6 +1103,8 @@ namespace SDKTemplate
         }
     }
 }
+
+
 //string strFilePath = @"C:\Users\Leon\Desktop\testtest.csv"; ;
 //string strSeperator = ",";
 //StringBuilder sbOutput = new StringBuilder();
