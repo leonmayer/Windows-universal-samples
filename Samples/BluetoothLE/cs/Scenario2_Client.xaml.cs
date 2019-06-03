@@ -460,6 +460,7 @@ namespace SDKTemplate
 
                     await Windows.Storage.FileIO.AppendLinesAsync(file, combinedarray);
 
+                    SaveDatatoCSV();
                     stringrr.Clear();
                     timelist.Clear();
 
@@ -470,6 +471,7 @@ namespace SDKTemplate
                 }
                 else
                 {
+                    SaveDatatoCSV();
                     stringrr.Clear();
                     timelist.Clear();
                     //OutputTextBlock.Text = "File " + file.Name + " couldn't be saved.";
@@ -477,6 +479,7 @@ namespace SDKTemplate
             }
             else
             {
+                SaveDatatoCSV();
                 stringrr.Clear();
                 timelist.Clear();
                 //OutputTextBlock.Text = "Operation cancelled.";
