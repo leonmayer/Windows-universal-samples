@@ -1,2 +1,2 @@
-MainPackage=C:\Users\Leon\Documents\Studium\Job\MedIT\Daq_Polar\Windows-universal-samples\Samples\BluetoothLE\cs\bin\ARM\Debug\BluetoothLE_0.0.2.0_ARM_Debug.msix
-SymbolPackage=C:\Users\Leon\Desktop\BluetoothLE_0.0.2.0_Debug_Test\BluetoothLE_0.0.2.0_ARM_Debug.appxsym
+MainPackage=C:\Users\leon\Documents\MedIT-Leon\Daqcode\Windows-universal-samples\Samples\BluetoothLE\cs\bin\ARM\Debug\BluetoothLE_0.0.1.0_ARM_Debug.msix
+SymbolPackage=C:\Users\leon\Documents\MedIT-Leon\Daqcode\Windows-universal-samples\Samples\BluetoothLE\cs\obj\ARM\Debug\Symbols\BluetoothLE_0.0.1.0_ARM_Debug.appxsym

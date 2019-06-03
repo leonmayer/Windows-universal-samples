@@ -21,7 +21,7 @@
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>A6DD4AB05DA86DE0D3A70DDE04F277A1939EA9DC</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>3945F3A346087EBD5935CFF178C1FB72E51F6B52</PackageCertificateThumbprint>
     <PackageCertificateKeyFile>BluetoothLE_TemporaryKey.pfx</PackageCertificateKeyFile>
     <AppInstallerUpdateFrequency>1</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>

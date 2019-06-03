@@ -349,6 +349,7 @@ namespace SDKTemplate
         private bool subscribedforcsvnotifications = false;
         private async void CharacteristicSaveButton_Click()
         {
+            SaveDatatoCSV();
             /*
             var picker = new Windows.Storage.Pickers.FileOpenPicker();
             picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
@@ -401,6 +402,7 @@ namespace SDKTemplate
                 //this.textBlock.Text = "Operation cancelled.";
             }
             */
+            /*
             FileSavePicker savePicker = new FileSavePicker();
             savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             // Dropdown of file types the user can save the file as
@@ -484,6 +486,7 @@ namespace SDKTemplate
                 timelist.Clear();
                 //OutputTextBlock.Text = "Operation cancelled.";
             }
+            */
 
 
         }
@@ -638,11 +641,18 @@ namespace SDKTemplate
             // BT_Code: An Indicate or Notify reported that the value has changed.
             // Display the new value with a timestamp.
             var newValue = FormatValueByPresentation(args.CharacteristicValue, presentationFormat);
-            if (stringrr.Count != 0)
-            { 
-                var message = $"Values at {DateTime.Now:hh:mm:ss.FFF}: \r\n{newValue} beats/minute \r\nRR interval length: {stringrr[stringrr.Count - 1]} ms";
-                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                    () => CharacteristicLatestValue.Text = message);
+            if (true)
+            {
+                try
+                {
+                    var message = $"Values at {DateTime.Now:hh:mm:ss.FFF}: \r\n{newValue} beats/minute \r\nRR interval length: {stringrr[stringrr.Count - 1]} ms";
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                        () => CharacteristicLatestValue.Text = message);
+                }
+                catch(ArgumentException)
+                {
+
+                }
             }
         }
 
@@ -739,7 +749,7 @@ namespace SDKTemplate
         static List<string> timelist = new List<string>();
         static List<string> stringrrfast = new List<string>();
         static List<string> timelistfast = new List<string>();
-        static int noofelementssaved = 30;
+        static int noofelementssaved = 10;
 
 
 
@@ -801,8 +811,8 @@ namespace SDKTemplate
 
 
                 //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
-                stringrr.Add(bytescombined4.ToString());
-                timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                //stringrr.Add(bytescombined4.ToString());
+                //timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                 stringrrfast.Add(bytescombined4.ToString());
                 timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                 
@@ -846,8 +856,8 @@ namespace SDKTemplate
 
 
                     //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
-                    stringrr.Add(longbytescombined4.ToString());
-                    timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                    //stringrr.Add(longbytescombined4.ToString());
+                    //timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                     stringrrfast.Add(longbytescombined4.ToString());
                     timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                     
@@ -891,8 +901,8 @@ namespace SDKTemplate
 
 
                     //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
-                    stringrr.Add(values3bytescombined4.ToString());
-                    timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                    //stringrr.Add(values3bytescombined4.ToString());
+                    //timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                     stringrrfast.Add(values3bytescombined4.ToString());
                     timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                     
@@ -936,8 +946,8 @@ namespace SDKTemplate
 
 
                     //stringrr.Add(BitConverter.ToUInt16(data, 4).ToString());
-                    stringrr.Add(values4bytescombined4.ToString());
-                    timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
+                    //stringrr.Add(values4bytescombined4.ToString());
+                    //timelist.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                     stringrrfast.Add(values4bytescombined4.ToString());
                     timelistfast.Add($"{DateTime.Now:hh:mm:ss.FFF}");
                     //SaveDatatoCSV(values4bytescombined4.ToString(), $"{DateTime.Now:hh:mm:ss.FFF}");
